@@ -26,6 +26,8 @@ public class MainForm extends JFrame {
         showButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                tableTextArea.setText("Wait");
+
 
                 TableMetadata tableMetadata = getColumnInfo();
                 System.out.println("tableMetadata = " + tableMetadata);
@@ -72,6 +74,7 @@ public class MainForm extends JFrame {
     }
 
     public void show(List<List> rows) {
+        tableTextArea.setText("");
         for (List row : rows) tableTextArea.append(row + " \n");
     }
 }
