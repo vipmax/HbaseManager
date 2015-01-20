@@ -105,7 +105,7 @@ public class HbaseViewer {
         }
     }
 
-    public List<List> showTable(String tableName, Map<String, String> columnTypes) throws IOException, InvocationTargetException, IllegalAccessException {
+    public List<List> getData(String tableName, Map<String, String> columnTypes) throws IOException, InvocationTargetException, IllegalAccessException {
 
         HTable table = new HTable(configuration, tableName);
         Scan s = new Scan();

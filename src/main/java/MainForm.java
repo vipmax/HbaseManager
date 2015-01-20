@@ -5,19 +5,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by maksim_petrov on 1/20/15.
  */
 public class MainForm extends JFrame {
     private JPanel rootPanel;
-    private JTextArea textArea;
+    private JTextArea tableTextArea;
     private JButton showButton;
     private JTextArea typesArea;
-    private JTextField tableNameTextField;
     private HbaseViewer viewer;
 
     public MainForm() {
@@ -29,12 +27,12 @@ public class MainForm extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                String tableName = tableNameTextField.getText();
-                Map<String, String> columnTypes = getColumnTypes();
+                TableMetadata tableMetadata = getColumnInfo();
+                System.out.println("tableMetadata = " + tableMetadata);
 
                 try {
-                    List<List> lists = viewer.showTable(tableName, columnTypes);
-                    showList(lists);
+                    List<List> rows = viewer.getData(tableMetadata.getTableName(),tableMetadata.getColumnTypes());
+                    show(rows);
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 } catch (InvocationTargetException e1) {
@@ -51,15 +49,29 @@ public class MainForm extends JFrame {
         this.viewer = viewer;
     }
 
-    private Map<String, String> getColumnTypes() {
-        Map<String, String> stringClassMap = new HashMap<>();
-        
-        stringClassMap.put("ID", "Long");
-        stringClassMap.put("Project", "String");
-        return stringClassMap;
+    private TableMetadata getColumnInfo() {
+        String text = typesArea.getText();
+        String[] rows = text.split("\n");
+        TableMetadata tableMetadata = new TableMetadata();
+        for (String row : rows) {
+            System.out.println("row = " + row);
+            row = row.trim();
+            if (tableMetadata.getTableName()== null && row.startsWith("table:"))  tableMetadata.setTableName(row.split("table:")[1].trim());
+
+            if (row.startsWith("column:")) {
+                String colType = row.split("column:")[1].trim();
+                System.out.println("colType = " + colType);
+                String[] colNameAndType = colType.split(" ");
+                System.out.println("colNameAndType = " + Arrays.toString(colNameAndType));
+                tableMetadata.addColumn(colNameAndType[0],colNameAndType[1]);
+            }
+
+        }
+
+        return tableMetadata;
     }
 
-    public void showList(List<List> lists) {
-        for (List row : lists) textArea.append(row.toString() + " \n");
+    public void show(List<List> rows) {
+        for (List row : rows) tableTextArea.append(row + " \n");
     }
 }
