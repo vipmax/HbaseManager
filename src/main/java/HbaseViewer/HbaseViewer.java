@@ -1,19 +1,21 @@
 package HbaseViewer;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.*;
-import org.apache.hadoop.hbase.filter.*;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.Logger;
 
-
-import static org.apache.hadoop.hbase.filter.CompareFilter.CompareOp.*;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by maksim_petrov on 1/20/15.
@@ -27,15 +29,14 @@ public class HbaseViewer {
     private final static String MAX_VALUE_COLUMN = "MaxValue";
     private final static String MIN_VALUE_COLUMN = "MinValue";
     private final static String SUM_VALUE_COLUMN = "SumValue";
+    private static final String IP = "127.0.0.1";           //localhost
     private final String HOUR_OF_DAY_COLUMN = "HourOfDay";
     private final String DAY_OF_WEEK_COLUMN = "DayOfWeek";
     private final String WEEK_OF_YEAR_COLUMN = "WeekOfYear";
     private final String MONTH_OF_YEAR_COLUMN = "MonthOfYear";
     private final String YEAR_COLUMN = "Year";
     private final String NUMBER_COLUMN = "Number";
-
     private Configuration configuration = new Configuration();
-    private static final String IP = "127.0.0.1";           //localhost
     private Map<String, String> metricNames;
     private Map<String, String> metricUnits;
 
@@ -105,7 +106,13 @@ public class HbaseViewer {
         }
     }
 
-    public List<List> getData(String tableName, Map<String, String> columnTypes) throws IOException, InvocationTargetException, IllegalAccessException {
+    public List<List> getData(String tableName, String ip, Map<String, String> columnTypes) throws IOException, InvocationTargetException, IllegalAccessException {
+        Configuration configuration = HBaseConfiguration.create();
+        configuration.setInt("timeout", 120);
+//        configuration.set("hbase.master", "*" + ip + ":9000*");
+        configuration.set("hbase.zookeeper.quorum", ip);
+        configuration.set("hbase.zookeeper.property.clientPort", "2181");
+
 
         HTable table = new HTable(configuration, tableName);
         Scan s = new Scan();
@@ -116,7 +123,6 @@ public class HbaseViewer {
 
         List<List> resultRows = new LinkedList<>();
         for (Result row : rows) {
-            System.out.println();
             List valueList = new LinkedList<>();
 
             for (KeyValue col : row.raw()) {
@@ -136,6 +142,7 @@ public class HbaseViewer {
 
                 }
             }
+            System.out.println("row = " + valueList);
             resultRows.add(valueList);
 
 

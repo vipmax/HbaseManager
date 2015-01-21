@@ -44,7 +44,7 @@
                   <component id="9fa07" class="javax.swing.JTextArea" binding="typesArea">
                     <constraints/>
                     <properties>
-                      <text value="table: DimProject&#10;&#10;column: ID Long&#10;column: Project String"/>
+                      <text value="table: DimProject&#10;ip: 127.0.0.1&#10;&#10;column: ID Long&#10;column: Project String"/>
                     </properties>
                   </component>
                 </children>

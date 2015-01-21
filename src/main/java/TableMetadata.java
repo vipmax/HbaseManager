@@ -5,11 +5,21 @@ import java.util.Map;
  * Created by maksim_petrov on 1/20/15.
  */
 public class TableMetadata {
-    String tableName;
-    Map<String, String> columnTypes;
+    private String tableName;
+    private String ip;
+    private Map<String, String> columnTypes;
 
     public TableMetadata() {
         columnTypes = new HashMap<>();
+    }
+
+    @Override
+    public String toString() {
+        return "Table{" +
+                "name='" + tableName + '\'' +
+                ", ip='" + ip + '\'' +
+                ", columnTypesAndNames =" + columnTypes +
+                '}';
     }
 
     public String getTableName() {
@@ -20,20 +30,20 @@ public class TableMetadata {
         this.tableName = tableName;
     }
 
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
     public Map<String, String> getColumnTypes() {
         return columnTypes;
     }
 
     public void setColumnTypes(Map<String, String> columnTypes) {
         this.columnTypes = columnTypes;
-    }
-
-    @Override
-    public String toString() {
-        return "TableMetadata{" +
-                "tableName='" + tableName + '\'' +
-                ", columnTypes=" + columnTypes +
-                '}';
     }
 
     public void addColumn(String name, String type) {

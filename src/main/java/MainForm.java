@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -32,11 +31,11 @@ public class MainForm extends JFrame {
             public void actionPerformed(ActionEvent e) {
 
 
-                TableMetadata tableMetadata = getColumnInfo();
+                TableMetadata tableMetadata = getTableInfo();
                 System.out.println("tableMetadata = " + tableMetadata);
 
                 try {
-                    List<List> rows = viewer.getData(tableMetadata.getTableName(),tableMetadata.getColumnTypes());
+                    List<List> rows = viewer.getData(tableMetadata.getTableName(), tableMetadata.getIp(), tableMetadata.getColumnTypes());
                     show(tableMetadata, rows);
                 } catch (IOException e1) {
                     e1.printStackTrace();
@@ -72,20 +71,19 @@ public class MainForm extends JFrame {
         this.viewer = viewer;
     }
 
-    private TableMetadata getColumnInfo() {
+    private TableMetadata getTableInfo() {
         String text = typesArea.getText();
         String[] rows = text.split("\n");
         TableMetadata tableMetadata = new TableMetadata();
         for (String row : rows) {
-            System.out.println("row = " + row);
             row = row.trim();
-            if (tableMetadata.getTableName()== null && row.startsWith("table:"))  tableMetadata.setTableName(row.split("table:")[1].trim());
+            if (row.startsWith("table:")) tableMetadata.setTableName(row.split("table:")[1].trim());
+
+            if (row.startsWith("ip:")) tableMetadata.setIp(row.split("ip:")[1].trim());
 
             if (row.startsWith("column:")) {
                 String colType = row.split("column:")[1].trim();
-                System.out.println("colType = " + colType);
                 String[] colNameAndType = colType.split(" ");
-                System.out.println("colNameAndType = " + Arrays.toString(colNameAndType));
                 tableMetadata.addColumn(colNameAndType[0],colNameAndType[1]);
             }
 
