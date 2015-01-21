@@ -1,6 +1,7 @@
 import HbaseViewer.HbaseViewer;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -13,20 +14,22 @@ import java.util.List;
  */
 public class MainForm extends JFrame {
     private JPanel rootPanel;
-    private JTextArea tableTextArea;
     private JButton showButton;
     private JTextArea typesArea;
+    private JTable table1;
+    private JButton saveButton;
+    private JButton loadButton;
     private HbaseViewer viewer;
 
     public MainForm() {
         setContentPane(rootPanel);
         setSize(600, 300);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setTitle("HBase manager");
 
         showButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                tableTextArea.setText("Wait");
 
 
                 TableMetadata tableMetadata = getColumnInfo();
@@ -34,7 +37,7 @@ public class MainForm extends JFrame {
 
                 try {
                     List<List> rows = viewer.getData(tableMetadata.getTableName(),tableMetadata.getColumnTypes());
-                    show(rows);
+                    show(tableMetadata, rows);
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 } catch (InvocationTargetException e1) {
@@ -43,6 +46,24 @@ public class MainForm extends JFrame {
                     e1.printStackTrace();
                 }
 
+            }
+        });
+        loadButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<String> rows = FileService.openFileWithFileChooser();
+                if (rows != null) {
+                    typesArea.setText("");
+                    for (String row : rows) typesArea.append(row + "\n");
+                }
+            }
+        });
+
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String text = typesArea.getText();
+                FileService.saveDataWithFileChooser(text);
             }
         });
     }
@@ -73,8 +94,16 @@ public class MainForm extends JFrame {
         return tableMetadata;
     }
 
-    public void show(List<List> rows) {
-        tableTextArea.setText("");
-        for (List row : rows) tableTextArea.append(row + " \n");
+
+    public void show(TableMetadata tableMetadata, List<List> rows) {
+
+        DefaultTableModel dataModel = new DefaultTableModel(rows.size(), tableMetadata.getColumnTypes().keySet().size());
+        dataModel.setColumnIdentifiers(tableMetadata.getColumnTypes().keySet().toArray());
+        for (int i = 0; i < rows.size(); i++) {
+            List row = rows.get(i);
+            for (int i1 = 0; i1 < row.size(); i1++) dataModel.setValueAt(row.get(i1), i, i1);
+        }
+
+        table1.setModel(dataModel);
     }
 }
